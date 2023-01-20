@@ -5,6 +5,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
 [![DOI](https://zenodo.org/badge/589857531.svg)](https://doi.org/10.5281/zenodo.7553204)
 
+## Accepted Paper: [What are the Practices for Secret Management in Software Artifacts?](https://github.com/setu1421/ICSE-2023-Artifacts/blob/main/What%20are%20the%20Practices%20for%20Secret%20Management%20in%20Software%20Artifacts%3F.pdf)
+
 ## Getting Started:
 Our artifact contains 694 questions from Stack Overflow, 40 questions from Information Security, and 45 questions from Software Engineering sites. In total, our artifact contains 779 questions from the three sites of StackExchange spanning from September 2008 to December 2021. In addition, our artifact contains 390 answers from StackOverflow, 17 answers from Information Security, and 27 answers from Software Engineering sites. Each answer is an accepted answer provided by the StackExchange community to mitigate a specific challenge of checked-in secrets. Each field of our question artifacts is described below.
 
