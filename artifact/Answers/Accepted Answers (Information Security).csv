@@ -1,0 +1,180 @@
+AcceptedAnswerId,Answer
+"13367","<p>My recommendation: <em>Don't store passwords in source code.</em></p>
+
+<p>Instead, store them in a configuration file (outside of the web root), and make sure the configuration file is not publicly accessible.  The reason is that you normally don't want to keep your passwords checked into the source code repository or exposed to everyone who can view files in your web root.</p>
+
+<p>There is an additional risk with storing passwords in a <code>.php</code> file within your webroot, which is a bit obscure but can be easily avoided by placing the file outside of your web root.  Consider: if you are editing <code>connection.php</code> using a text editor, and your connection drops while you are editing it, your editor will automatically save a copy of the <code>connection.php</code> file in some backup file: e.g., <code>connection.php~</code> (in the same directory).  Now the backup file has a different extension, so if someone tries to fetch that file, the Apache server will happily serve up a copy of the file in plaintext, revealing your database password.  See <a href=""https://www.feross.org/cmsploit/"" rel=""noreferrer"">1% of CMS-Powered Sites Expose Their Database Passwords</a> for details.</p>
+
+<p>See also <a href=""https://security.stackexchange.com/q/12295/971"">How do open source projects handle secure artifacts?</a>, <a href=""https://stackoverflow.com/q/1635963"">Open Source and how it works for secure projects?</a></p>
+"
+"20009","<p>You are correct. App secret should be secret and should not be easily obtained by reverse engineering your client code.<br />
+Facebook uses OAuth so everything I say here also applies to all the applications that use OAuth to authorize and authenticate. The app secret authenticates your client to facebook. Just like a username/password authenticates a user to a webservice, mobile/desktop clients use app secret key as a credential for server to validate that its the 'real' legitimate client app. <br /></p>
+
+<blockquote>
+  <p>If the evil guy obtains these entries, what is the worst possible misuse he could perform?</p>
+</blockquote>
+
+<p><strong>He could make a spoofed client</strong> that looks just like your client/application and release it. Unsuspecting users will download it and use it to connect to facebook. The fake app doesn't still get users credentials (which is good) because the authentication of user credentials happens on a facebook page. However, the user ends up authorizing this fake app on facebook. Facebook happily does that because it believes that anyone who presents that secret is you. As a result, the fake app gets the 'access token' for the user and can start posting comments and do other things that your real app doesn't intend to do.<br />
+So in a nutshell, its your reputational value that is at stake here. Other clients can <strong>impersonate</strong> as your client to facebook.</p>
+
+<p>This is a <a href=""http://arstechnica.com/security/2010/09/twitter-a-case-study-on-how-to-do-oauth-wrong/"" rel=""nofollow noreferrer"">thorough case study</a> of one such twitter client which stored consumer key (their equivalent of app secret) in plain text. </p>
+
+<p>I am quoting one line from that blog:</p>
+
+<blockquote>
+  <p>It’s very important to understand that a compromised consumer secret key doesn’t jeopardize the security of the users of the application. The key can’t be used to gain access to the accounts of other users, because accessing an individual account requires an access token that individual instances of the client application obtain automatically on behalf of the user during the authorization process.</p>
+</blockquote>
+
+<p>Now, how do you protect the client secret? <br />
+If it is a standalone client (like a mobile app), you have little choice but to embed it in some form. Unfortunately for a expert reverse engineer, its only a matter of time before it can be decoded. After all its <a href=""https://stackoverflow.com/questions/5525305/how-to-store-a-secret-api-key-in-an-applications-binary"">somewhere there (in some form) in the client</a>. If the client can re-calculate/re-assemble it, so can a reverser.</p>
+
+<p>Edit: If your application architecture permits it, your server can perform the OAuth steps on behalf of the client/mobile app. This way the key resides in the server, it does all the OAuth steps and passes the access_token to your client to use it to access user's facebook data. At this point you are doing something very similar to the browser - web server - facebook interaction <a href=""https://fbcdn-dragon-a.akamaihd.net/cfs-ak-ash4/85001/822/440534655991167-/serversideflow.png"" rel=""nofollow noreferrer"">described here</a>. Just replace 'User's Browser' with your 'Client/Mobile App' and 'Your App' with 'Your Server' in that picture.</p>
+
+<p>If this is some sort of a web application, this can be easily achieved by keep the key only on the server side and using facebook's <a href=""https://developers.facebook.com/docs/authentication/server-side/"" rel=""nofollow noreferrer"">server side flow</a> to prevent app secret from leaking out.</p>
+"
+"37017","<p>The next paragraph is key:</p>
+
+<blockquote>
+  <p>Such constants belong in properly protected properties or configuration files.</p>
+</blockquote>
+
+<p>You should define the username/password credentials as variables in a separate file, something like <code>db_config.php</code>. This config file should then be included by whatever PHP source code files need to use them for connecting to the DB.</p>
+
+<p>This config file should have permissions set so that the general public cannot read them, and should be excluded from source code version control so they do not get checked in.</p>
+
+<p>The basic goal is for the sensitive information to be contained in just one place that is not a part of the main source code.</p>
+
+<p>This does not mean that the credentials won't be in a file alongside the source code, and it does not mean that the config file cannot be a PHP file.</p>
+"
+"38480","<p>This is an interesting question with several facets that should be broken down.</p>
+
+<p>The first question you asked is ""How risky is this?"" and the answer is ""Very"".  Exposing those credentials on a 3rd-party service that you don't control and manage then you are increasing the risk.  There are lots of ways your credentials could be exposed: service compromise, compromised service accounts, authorization failure in the service, network eavesdropping (if SSL/TLS isn't used to serve code), you granting access to the wrong person, etc.</p>
+
+<p>Basically, consider those credentials exposed.</p>
+
+<p>Sounds terrible, right?  Maybe not... Now you have to ask the question ""Am I comfortable with that risk?""  If you have other mitigations in place then you might be okay with it.  If you limit (perhaps with IP whitelisting) where those credentials can be used from then the credentials become less useful to steal.  The service could also extremely low value and it doesn't make financial sense to add additional security.  If the cost of recovering from a compromise is $10 and adding in extra security would cost $1,000,000 then you live with the risk.  (That said, if you've made a commitment to your users about protecting them or their information, you have an ethical obligation to try to honor that commitment, regardless of the cost.)</p>
+
+<p>Some additional thoughts:</p>
+
+<p>""projects I am working on for my company"" - You are doing this on behalf of the company you work for, they probably have policies or acceptable practices.  If that's the case, those should take precedent over what you're comfortable with.  The risk you're creating affects your company and it's reputation, the company gets to make the final call.</p>
+
+<p>Lucas Kauffman suggests a good approach.  I can't say if it will work for you but the takeaway is to find a mitigation that works for your deployment process and reduces risk to a comfortable level.</p>
+"
+"49739","<p>If your computer is able to use the API without a password, then the information has to be stored somewhere on your system.  The point of storing it in the environment variable is to make it so that you don't check it in to the version control along with the source, however really, the ideal would be to use something like a HSM or TPM to store the API key in an encrypted manner that you can retrieve programmatically or store it on disk encrypted with the account credentials for the service or application that uses it.</p>
+
+<p>I personally would be hesitant to use environment variables, but if you are only worried about accidentally revealing the key (and not local security for someone with access to your box) then it is one option for how to separate the code and keys, just not the best one.</p>
+"
+"51148","<p>There is nothing <em>insecure</em> with what you are suggesting. </p>
+
+<p>However, <em>why</em> would you want to store a private key in your source control? If I fork your project, why will I be using <em>your</em> private key? It is obvious that I would want to generate and use my own private key, so make that part of the setup process.</p>
+"
+"76047","<p>The database login credentials should not be part of your sourcecode. They should be part of the configuration files. The production version of these configuration files should not be part of the official codebase. You should only publish an example configuration with example parameters.</p>
+
+<p>This is not just recommended from a security perspective, it also makes it much easier for others to use your project. They will definitely have other login credentials than you do, so providing a config file where they can enter them is much more comfortable than digging through the source and replacing all references to them.</p>
+
+<p>For more information, check the question ""<a href=""https://softwareengineering.stackexchange.com/questions/205606/strategy-for-keeping-secret-info-such-as-api-keys-out-of-source-control/"">Strategy for keeping secret info such as API keys out of source control?</a>"" on programmers stackexchange</p>
+"
+"103387","<p>I can think of a couple of options which may help.</p>
+
+<p>1)Keep the config file on the live servers and have the build process copy it to the new deployment folder. As long as you restrict access to the live box, you get away from everyone having access.</p>
+
+<p>2)Encrypt the passwords and have the decryption keys live on the server. anyone without access to the box can't decrypt the file.</p>
+
+<p>3)Use RSA, give the server a private key and store the public key in the app database. The public key encrypts the password file, the app grabs the servers private key and uses that for decryption. This way, anyone can have the config file and anyone with access to the DB can create one. Only people with access to the certificate store on the server can access the decryption key. You can add signing if you want.</p>
+
+<p>You can keep copies of the keys/passwords somewhere with restricted access in case you need to recover them. </p>
+"
+"105840","<p>In general mixing code and secret configuration (passwords, keys etc) in the same respository is a bad idea because generally a lot more people need (or at least would benefit from) access to the code than need access to any given secret. Also the common workflow with VCS systems is to create lots of copies.</p>
+
+<p>That doesn't mean you can't put secret configuration in a VCS but it should be a seperate repository from your code and access to it should be very tightly controlled. </p>
+"
+"111443","<p>I'm assuming that your threat model is an attacker gaining access to read files on your webserver via some type of web exploit. If not, you should question what exactly you are mitigating with your proposed encryption strategy.</p>
+
+<p>If it is, an option similar to 2 is probably the most simple.</p>
+
+<p>I would use AES128-CBC as the algorithm for a Key Encrypting Key. With a CSPRNG generated 128 bit encryption key, there is no need to use a key stretching algorithm. Algorithms such as PBKDF2 are only needed when you are attempting to secure weak, user supplied passwords. If you can set the keys yourself, you can simply make sure that they are the required bit strength.</p>
+
+<p>AES256 is slower, and with no additional security over AES128.</p>
+
+<p>Make sure your configuration file and your key file is locked down by access control lists.</p>
+
+<h2>Key file:</h2>
+
+<pre><code>&lt;128 bit random key&gt;
+</code></pre>
+
+<p>Can only be read by a custom service account.</p>
+
+<h2>Config file:</h2>
+
+<pre><code>Passwords to systems, encrypted by the key in the Key file.
+</code></pre>
+
+<p>Can only be read by the web server identity.</p>
+
+<hr>
+
+<p>Make sure these files aren't servable by your web server (e.g. <code>example.com/config.txt</code> won't work). The way this should work is that you have a service account that runs a process. The web service calls this process and asks the service to decrypt a configuration file password for it. The service validates that only the web server process can call it.</p>
+
+<p>This will protect your secrets from any LFI exploits in your system or server because an attacker in the context of the web server user won't have permission to read the key file or decrypt any credentials in your config file.</p>
+
+<p>It won't protect against physical access, logical access to the system by another administrator level account, or any vulnerabilities that allow a process to be called. It would basically only protect against file reads of the config file directly by the web identity (the user the website itself runs as). If this is not a concern, then there is no need to encrypt secrets at all - the only thing it would really be protecting was casual observation by parties that may see the configuration file.</p>
+"
+"143655","<p><a href=""https://danielsomerfield.github.io/turtles/"" rel=""nofollow noreferrer"">Turtles All the Way Down</a> is a good talk that covers this subject.</p>
+
+<p>In short, there aren't any great solutions, because if you store the password to the database somewhere, you have to authenticate to <em>that</em> somehow, which leaves you back where you started.  However, there are some options that reduce your risk.</p>
+
+<p>The most common solutions are to store the password in an untracked file or environment variables on the server.  This prevents a leak of your source code from exposing the password, but someone who gains access to your server will still be able to see it.  You can also use systems that encrypt passwords into a file that is then stored in version control, which gives you all the benefits of a VCS, but this falls to similar issues.</p>
+
+<p>Personally, I'm fond of secrets management systems like Hashicorp's Vault or Square's Keywhiz.  These are systems that (usually) live external to your server and provide an API for getting and setting secret values.  While they require authentication, this authentication can be temporary session values, similar to session cookies for websites, which will prevent an undetected attacker from gaining long-term access to your secrets, as the session they've stolen will expire (at some configurable time).  These systems generally include audit logs as well, so once you detect a breach, you can track down where it came from.</p>
+
+<p>The solution that makes the most sense for your particular situation depends a lot on your needs.  Vault and friends are excellent, but introduce a lot of additional operational complexity, possibly more than the entire rest of your application.  You will need to evaluate the tradeoffs for yourself to see what would be a good fit.</p>
+"
+"169032","<p><code>git gc</code> only affects your local copy and the following <code>git push</code> will not propagate any instruction for garbage collection to the remote site. See also <a href=""https://stackoverflow.com/questions/3162786/how-can-i-trigger-garbage-collection-on-a-git-remote-repository"">How can I trigger garbage collection on a Git remote repository?</a> and <a href=""https://help.github.com/articles/removing-sensitive-data-from-a-repository/"" rel=""nofollow noreferrer"">Removing sensitive data from a repository (at github)</a>. And while the last one helps you with removing some sensitive data it also contains a clear warning of the limitations of this approach:</p>
+
+<blockquote>
+  <p>Warning: <strong>Once you have pushed a commit to GitHub, you should consider any data it contains to be compromised.</strong><br>
+  ... commits may <strong>still be accessible in any clones or forks</strong> of your
+  repository, <strong>directly via their SHA-1 hashes in cached views</strong> on GitHub,
+  and through any pull requests that reference them. You can't do
+  anything about existing clones or forks of your repository, but you
+  can permanently remove all of your repository's cached views and pull
+  requests on GitHub by contacting GitHub Support.</p>
+</blockquote>
+
+<p>And while this is from Github it is probably similar on Gitlab.</p>
+"
+"187603","<p>We decided for option A: users need to create client_secret.json and credentials.json files themselves. It is unfortunately not the most straight forward, but the most secure one. Sharing credentials in a public repo is just a big no-go, no matter the details.</p>
+
+<p>Also for the sake of completeness: another alternative would be to have our application running on a server where we could save the client_secret, so then a user would just be presented with a browser-popup where he/she would authorize our service.</p>
+
+<p>But we don't follow that option either since the script shall only contain the core logic and it shall be a base for other to develop upon. </p>
+
+<p>That's our motivation behind the decision.</p>
+"
+"188092","<p>Yes, there are several tools that provide automating the best practices for managing a <a href=""https://www.sans.org/security-resources/policies/server-security/pdf/database-credentials-policy"" rel=""nofollow noreferrer"">database credentials policy</a>. </p>
+
+<p>If you are using AWS then there is <a href=""https://aws.amazon.com/secrets-manager/"" rel=""nofollow noreferrer"">AWS Secrets Manager</a>. For a cloud provider agnostic solution there is <a href=""https://www.vaultproject.io/"" rel=""nofollow noreferrer"">Hashicorp’s Vault</a> which is manages secrets of all types. </p>
+
+<p>If you want to deploy something locally in your own environment there is <a href=""https://www.conjur.org/"" rel=""nofollow noreferrer"">Conjur</a> which is open source. There are also other commercial tools like okta and <a href=""https://www.trustradius.com/products/conjur/competitors"" rel=""nofollow noreferrer"">others</a></p>
+"
+"200631","<p>Run a tool such as <a href=""https://github.com/michenriksen/gitrob"" rel=""nofollow noreferrer"">GitRob</a> or <a href=""https://github.com/dxa4481/truffleHog"" rel=""nofollow noreferrer"">truffleHog</a> to find sensitive information in your repositories and then use <a href=""https://rtyley.github.io/bfg-repo-cleaner/"" rel=""nofollow noreferrer"">BFG</a> to remove the data from your GIT history. </p>
+
+<blockquote>
+  <p>Replace all passwords listed in a file (prefix lines 'regex:' or 'glob:' if required) with <code>***REMOVED***</code> wherever they occur in your repository:</p>
+
+<pre><code>$ bfg --replace-text passwords.txt  my-repo.git
+</code></pre>
+</blockquote>
+
+<p>That all being said, please make sure to roll any credentials and keys that you discover in published repositories — it is best to assume those have been compromised.</p>
+"
+"243538","<p>There's little risk, when running it locally. The app/files are only available to your browser on localhost. (assuming no malware is installed on your system)</p>
+<p>but...
+It's good to get into the habit of secure coding practices. It's easy to forget the API key is there as the application grows and commit your code and secret to a public Github repo.</p>
+<p>If you are developing locally, it's easy enough to setup a local <code>.env</code> file with your secrets and (I believe in React you) reference it with <code>process.env.MY_KEY</code>. Good reference material <a href=""https://medium.com/better-programming/how-to-hide-your-api-keys-c2b952bc07e6"" rel=""nofollow noreferrer"">here</a>. The file permissions should be set to your local user.</p>
+<p>Note though that in Production you're not going to want to use the env file as the files are all visible from the client. You'll want to use some form of Key Management System to initialize the key variable. Alternatively, your app could request the key from a backend server.</p>
+"
+"255895","<p>The moment you hardcore a password in your software, it's effectively exposed to anyone who can run and analyze this EXE file. It's a good idea to store it in a separate file and don't include this file in source code control, but there's not much you can do preventing it from being reverse engineered once the app is distributed. Not only can it be reverse engineered through static code analysis, but it can also be intercepted at the moment the initial DB connection is being made.</p>
+<p>The only possible strong solution I see is actually implement an additional layer between the user and the password - for example, providing the user application from Citrix (without giving him full control over the application file), or (seems better) giving the user a web interface only, or connect from the application to some interim API server which will route the requests to DB without exposing the password to the user.</p>
+"

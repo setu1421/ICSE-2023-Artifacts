@@ -1,0 +1,480 @@
+AcceptedAnswerId,Answer
+"12829","<p>One trick learned in the ASP classic days, was to have the connection string in an outside file.</p>
+
+<pre><code>''// Init the ADO objects  &amp; the stored proc parameters
+cmd.ActiveConnection = ""file name=c:\udl\mydb.udl""
+cmd.CommandText = sqlstmt
+cmd.CommandType = adCmdStoredProc
+....
+</code></pre>
+
+<p>It works in ADO, don't know your environment</p>
+"
+"48759","<p>It's fine!</p>
+
+<p>If you're planning to dump out your database that contains private information about anything, I urge you to think again. In terms of security, if it's obvious that you haven't sanitised your user input, well... I guess you'll learn that lesson one way or another. Apart from the obvious security loopholes (which you should be avoiding anyway), think about how much time it'd take for you to browse the code of another web site and look for potential exploits. (Ages.)</p>
+
+<p>Regarding intellectual property and all the genius ideas that you'll come up: there are <em>probably</em> people out there that are smarter than you, so nothing of yours is going to stolen.</p>
+"
+"105815","<p>Without knowing more specifics about this particular situation, it seems as though you are unable to ""have your cake and eat it too"".  If there is no other option (my disclaimer here is that I'm unfamiliar with OS X), then you need to choose between automation and security.</p>
+
+<p><em>Who has access to these dmg files?</em>  If administrators or trusted users are the only ones, then you are probably fine with storing this passwords in plain text, as long as these are dedicated passwords and don't extend beyond the necessity of the script completion.</p>
+
+<p><em>Is this a truly unattended script?</em>  If it is not, and it's a minor inconvenience to input a password, then you may be better off just sucking it up and entering in the password as the only step for these script files.</p>
+
+<p>Again, somebody with OS X experience might give more applicable suggestions, but a general rule of thumb for security is deciding which is more important (security vs. adminsitration) for the given situation/environment.</p>
+"
+"118641","<p>There's no substantive difference, except that you'll have to actually build a binary if you wanted to make a configuration change if you put it in a DLL, whereas an admin could just modify the configuration with well-understood off-the-shelf tools if it's in the config. There's already <a href=""http://chiragrdarji.wordpress.com/2008/08/11/how-to-encrypt-connection-string-in-webconfig/"">a mechanism for encrypting configuration strings</a> and <a href=""http://msdn.microsoft.com/en-us/library/89211k9b%28v=VS.100%29.aspx"">additional guidance on MSDN</a>. Current versions of Asp.Net may have alternative mechanisms, so do some additional research before committing to an approach.</p>
+
+<p>Just because something is sitting in a DLL, doesn't make it any more secure. A text editor can open binary files just as well, tools like Reflector can provide a nicer interface to navigating a .Net DLL; a DLL won't provide any ""extra"" encryption.</p>
+"
+"134123","<p>All version control systems I am aware of have some form of ""obliterate"" capability that allows you to remove data permanently. This is normally not something you want to do lightly as it inevitably involves rewriting history. Most version control systems in fact restrict this ability to administrators or at least to users with direct access to the central repository. In a distributed version control system like git, this is complicated by the fact that many people may have clones of the repository and therefore copies of the sensitive data. If you cannot guarantee that all copies are destroyed, you have a problem.</p>
+
+<p>Some general advice from an SCM pro: As a matter of policy I won't use any ""obliterate"" equivalent unless requested to do so by the company's legal department. This is because, as I said, you are rewriting history, and the history of the code in your repository can be considered legal evidence in some cases. I probably would recommend not removing a password as a password can be changed.</p>
+
+<p>In your particular instance, I would strongly recommend that you not do anything without talking to your supervisor, even if you do have the access or the knowledge to remove the password. Messing around with the history in your repository is not something you should be doing on your own authority.</p>
+"
+"147259","<p>You are being a bit paranoid, every solution to hide a password won't work against someone who really wants it, but there are better ways to solve this issue so some concern is warranted. Your idea is far worse than the current situation, with your idea everyone has access to the database that can use the scripts, any of them could easily do bad things to your database, and no one has to go through the trouble of figuring out the account used to access the database.</p>
+
+<p>The best solution would be to create a small desktop app or web app that can be used to upload excel files or however your data comes, and then encrypt the connection string.</p>
+"
+"156892","<p>Having a database username and password in App.Config is a risk if your server is compromised and someone is able to access the config file. </p>
+
+<p>Yes, you can encrypt sections of App.Config: have a read of <a href=""http://msdn.microsoft.com/en-us/library/53tyfkaw%28v=vs.100%29.aspx"" rel=""nofollow"">Encrypting Configuration Information Using Protected Configuration</a> on MSDN.</p>
+
+<p>However a simpler method, and the one which I believe is Microsoft's recommended practice, is to use Windows authentication on your database rather than SQL authentication. Grant the Windows account that your WCF service runs under the access it needs to do it's database reads and writes (and no more), and modify the connection string in your App.Config to <code>Integrated Security=SSPI</code>. No username and password in the config file any more.</p>
+"
+"180973","<p>Best practices suggest the following:</p>
+
+<ol>
+<li><strong>Do not commit database credentials or any other sensitive data to source control. Ever.</strong> Put those in a file (say, <code>config.php</code>) that is explicitly excluded from source control (through <code>.gitignore</code> / <code>.hgignore</code> / ...), and provide a placeholder file (say, <code>config.dist.php</code>) instead that contains only dummy credentials; then in your installation guide, tell people to copy this file over to <code>config.php</code> and fill in the correct credentials.</li>
+<li><strong>Do not give anyone access to the production server.</strong> The database is the least of your concerns: if you allow people to upload arbitrary PHP, you might as well give them shell access, and preventing a skilled hacker from escalating to root from there borders on impossible. Instead, have people run their own private installs of the application. Provide an example apache configuration, php.ini, and some scripts to set up a test database (structure <em>and</em> data). You should have such an install kit anyway, if only for your own peace of mind. (What if your production server crashes beyond repair? Having an install kit that is proven to work means you can reinstall at any time, instead of having to come up with an emergency solution when the room is already on fire.)</li>
+<li><strong>Review every single line of code</strong> that goes onto the production server, or even into the main line of development. If you are using a distributes source control system, have people work on their own clones of the main repository, and send you pull requests for any feature they want included in the main line. If you're still on centralized source control, give each contributor their own branch, and mandate that only you are to merge into trunk. Review every merge before you make it final.</li>
+<li><strong>Test each version before deploying it.</strong> This should go without saying, but reality suggests otherwise. Also, make sure to use release tags; it's the easiest way to make sure no extra commits sneak in between testing and deployment (i.e., you want to make sure the version you're deploying is the exact version you have tested).</li>
+</ol>
+
+<p>For a bit of a reference frame, consider yourself wearing two hats - the code maintainer hat, and the primary user hat. As code maintainer, you guard source control and anything that goes into it; as the primary user, you install the product on a server and open it to the public. Structure the whole project in a way that would allow you to pass one of those hats to someone else at any time without impacting your work under the other. At some point, you may want to share the burden of these duties, and when that happens, it will come handy if you have to trust people with either the main repo <em>or</em> the production server, but not both.</p>
+"
+"186572","<p>I can think of an easy legitimate reason: suppose I write a program to do an offline version of the <a href=""https://www.ssllabs.com/ssltest/index.html"" rel=""nofollow"">SSL Labs server test</a>. A good test suite for that program would include various certificates with different problems and some configuration to use them for testing. E.g. it checks for the Debian weak key problem, so you'd want a certificate with a Debian weak key (perhaps for the domain <code>weakkey.example.com</code>).</p>
+
+<p>Of course, test certificates are not the same as real signed certs from a proper CA. (For testing purposes you'd use a testing CA). I would imagine that the major CAs have revoked the certificates whose private keys were available on github.</p>
+
+<p>(Incidentally, if anyone knows of a repository of test certs, feel free to leave a comment...)</p>
+"
+"196033","<p>This is a perennial problem. At some point, when software needs to access something protected by a password, the software needs that password. And for the software to get that password, and not require a user to enter it manually, it has to be stored in persistent storage of some sort. I see several options:</p>
+
+<ol>
+<li><p>Use a hand-created (or copied) password file, ignored by the version control system, and perhaps with limited readability (just the owner (0400 on Unix), for example). I do this myself sometimes these days.</p></li>
+<li><p>Encrypt the password file somehow. Technically, this doesn't actually solve the problem, as the decryption key needs to be stored somewhere, too, but it means that the password is no longer stored in cleartext. The decryption key could be baked into the software that reads the encrypted password file, and an encryption key baked into a small utility that generates encrypted password files. This might be pretty good. I did this in earlier days when I was more paranoid.</p></li>
+<li><p>Use a pre-shared key mechanism similar to what people do to ssh to remote machines without needing a password. This might be harder to set up, but can be elegant.</p></li>
+</ol>
+"
+"205608","<p>Don't put your secret information in your code. Put it into a configuration file which is read by your code at startup. Configuration files shouldn't be put on version control, unless they are the ""factory defaults"", and then they shouldn't have any private information.</p>
+
+<p>See also the question <a href=""https://softwareengineering.stackexchange.com/questions/141698/version-control-and-personal-configuration-file"">Version control and personal configuration file</a> for how to do this well.</p>
+"
+"216014","<p>Rename <code>parameters.yml</code> to <code>parameters.yml.sample</code>, and ignore <code>parameters.yml</code> in your version control.</p>
+
+<p>For each installation of the app, copy <code>.sample</code> back to the proper location and edit the details as needed.</p>
+
+<p>That way you have a sample file that says what kind of details (mailer, DB, API keys, etc.) each installation needs, and the secrets are never in version control.</p>
+"
+"222852","<p>First of all, I would not refer to myself as a security expert, but I have been in the position of having to answer this question.  What I found out surprised me a bit: <em>There is no such thing as a completely secure system</em>.  Well, I guess a completely secure system would be one where the servers are all turned off :)</p>
+
+<p>Someone working with me at the time described designing a secure system in terms of <em>raising the bar</em> to intruders.  So, each layer of securing decreases the opportunity for an attack.</p>
+
+<p>For example, even if you could perfectly secure the private key, the system is not <em>completely</em> secure.  But, correctly using the security algorithms and being up to date with patches raises the bar.  But, yes, a super computer powerful enough and given enough time can break encryption.  I'm sure all of this is understood, so I'll get back the question.</p>
+
+<p>The question is clear so I'll first try to address each of your points:</p>
+
+<blockquote>
+  <p>Say the key is protected by the filesystem's security model; but what
+  about (malicious) superusers, or platforms that don't provide such
+  fidelity?</p>
+</blockquote>
+
+<p>Yes, if you use something like <a href=""http://msdn.microsoft.com/en-us/library/windows/desktop/bb204778%28v=vs.85%29.aspx"" rel=""noreferrer"">Windows Key Store</a> or a password encrypted TLS private key you are exposed to the users that have the password (or access) to the private keys.  But, I think you will agree that raises the bar.  The file system ACLs (if implemented properly) provide a pretty good level of protection.  And you are in the position to personally vet and know your super users.</p>
+
+<blockquote>
+  <p>Or the key is hardcoded into software binaries, but it could always be
+  decompiled and what about open source software or interpreted code?</p>
+</blockquote>
+
+<p>Yes, I've seen hardcoded keys in binaries.  Again, this does raise the bar a bit.  Someone attacking this system (if it is Java) has to understand that Java produces byte code (etc) and must understand how to decompile it are read it.  If you are using a language that writes directly to machine code, you can see that this raises the bar a bit higher.  It is not an ideal security solution, but could provide some level of protection.</p>
+
+<blockquote>
+  <p>If the key is generated, such an algorithm would need to be
+  deterministic (presumably) and then the same problem applies to the
+  seed.</p>
+</blockquote>
+
+<p>Yes, essentially then the algorithm becomes the private key information for creating the private key.  So, it would need to now be protected.</p>
+
+<p>So, I think you have identified a core issue with any security policy, <strong>key management</strong>.  Having a key management policy in place is central to providing a secure system.  And, it is a <a href=""http://en.wikipedia.org/wiki/Key_management"" rel=""noreferrer"">pretty broad topic</a>.</p>
+
+<p>So, the question is, how secure does your system (and, therefore the private key) need to be? How high, in your system, does the bar need to be raised? </p>
+
+<p>Now, if you willing to pay, there are some people out there that produce solutions to this.  We ended up using an <a href=""http://en.wikipedia.org/wiki/Hardware_security_module"" rel=""noreferrer"">HSM (Hardware Security Module)</a>.  It is basically a tamper-proof server that contains a key in hardware.  This key can then be used to create other keys used for encryption.  The idea here is that (if configured correctly), the key <em>never leaves</em> the HSM.  HSMs cost <em>a lot</em>.  But in some businesses (protecting credit card data lets say), the cost of a breach is much higher.  So, there is a balance.</p>
+
+<p>Many HSMs use key cards from maintenance and admin of the features.  A quorum of key cards (5 of 9 lets say) have to be physically put into the server in order to change a key.  So, this raises the bar pretty high by only allowing a breach if a quorum of super users collude.</p>
+
+<p>There may be software solutions out there that provide similar features to an HSM but I'm not aware of what they are.</p>
+
+<p>I know this only goes some way to answering the question, but I hope this helps.    </p>
+"
+"227835","<p>To summarize:</p>
+
+<ul>
+<li>You have an API key issued to you by a vendor so you can use their API, and you have an obligation to prevent this key from being known by anyone else </li>
+<li>You are making calls to that vendor's API (which require the API key) in your application code</li>
+<li>You are deploying the application to systems where customers have access to the binaries and thus could potentially decompile/deobfuscate the code or intercept traffic</li>
+</ul>
+
+<hr>
+
+<p>The best way to prevent compromise of this key is to keep control of it. This means it should never be deployed on a server where anyone besides you could read the binary, and never go over a communication link you don't control.</p>
+
+<p>Ultimately, if the binaries are out of your control, everything in them is out of your control. Likewise, if someone can intercept traffic, they can capture the API key (<a href=""https://security.stackexchange.com/questions/44716/is-it-possible-to-intercept-https-traffic-and-see-the-links"">potentially even if you're using SSL</a>). </p>
+
+<p>I can see two primary ways to accomplish this, both of which don't include your private API key in your deployed application:</p>
+
+<h2>Get a unique API key for each deployment</h2>
+
+<p>This would require some additional relationship with the vendor, where you can obtain keys or have your customers obtain keys. </p>
+
+<p>This is actually quite common with, for example, products that use Google Maps API. The creator of the software has their own key they use while developing/running their copy, but they do not include it in the software, and instead, require you, as the user installing said software, to go to Google and obtain your own API key. The software merely has a configuration option to set the Google Maps API key to use.</p>
+
+<p>In fact, many vendors that issue API keys contractually require you do things this way, so you may even be off on the wrong path anyway, and this may be the only solution you're allowed to use according to the vendor's Terms of Service and/or any legal contracts you may have with them.</p>
+
+<h2>Use a Proxy</h2>
+
+<p>Set up a proxy API, where your application calls your API (on your servers), and in turn, your API calls the vendor's API using the key.</p>
+
+<p>You may need additional protection on your API, eg, something to ensure only your application is using it. This could be done by:</p>
+
+<ul>
+<li>making the functionality so specific nothing but your app can use it</li>
+<li>IP whitelists</li>
+<li>Some existing licensing/authorization mechanism you already have for your servers</li>
+<li>Your own API key system where you can issue keys to your customers</li>
+</ul>
+
+<p>The thing to keep in mind here is that you may not be allowed to do this. Your vendor may have Terms of Service or legal contracts that prevent you from building an ""aggregation service"" or proxy, so you need to check with that.</p>
+
+<hr>
+
+<h2>Handling Misbehaviour</h2>
+
+<p>Even if your key doesn't get compromised, if one of your customers is doing something that causes the vendor to block your key, suddenly ALL your customers are disabled, and your only fix is to update everybody else. </p>
+
+<p>Similarly, if <em>you</em> want to block one of your customers (eg, they stopped paying, have pirated the software, etc) then you can't do it without issuing an update to everybody else, and then disabling the key. </p>
+
+<p>The logistics of this for anything beyond a handful of clients will quickly becoming untenable.</p>
+
+<p>Whether you act as a proxy or have a unique key for each installation, you can handle any of these situations relatively easily (and with little to no impact to anyone else).</p>
+
+<hr>
+
+<p>Trying to protect the key while it's embedded in your software is ultimately a futile effort. No matter what you do, any attacker that has access to the binaries, source, and/or communications channel and is determined enough to get at they key will be able to do so. </p>
+
+<p>So don't embed it. ""The only winning move is not to play.""</p>
+"
+"235027","<p>It's not ""common sense"" not to store credentials in source control. That really depends on your situation. It's a perfectly acceptable practice if the developers would already have access to production resources, or if the accounts are read-only and there's no privacy issue, or if the credentials are encrypted in some way.</p>
+
+<p>If you're going as far as building your own deployment pipeline, then you would usually use a configuration management tool, which will handle all of the storage, encryption, users/privileges, etc. There are open-source tools like <a href=""https://code.google.com/p/escservesconfig/"" rel=""nofollow"">ESCAPE</a> which provide this in a REST API, and other commercial tools (and possibly some other open-source tools) that provide similar functionality.</p>
+
+<p>Some teams go with full-blown release management software like those from Atlassian, Red Gate, Thoughtworks, Serena, DevOpsGuys, Octopus, Cachet, etc. I'm not going to recommend a specific one because it depends entirely on your business structure and technology stack. But suffice it to say that most if not all of them will integrate configuration management into the process, and allow you to define ""environments"" and configurations to go with those environments; when you deploy a specific component to a specific environment, it takes the configuration files and replaces/transforms them with the correct settings for that environment.</p>
+
+<p>Basically it depends on your budget and time. If I had low time/low budget, I'd keep storing them in source control; encrypt them if necessary. If I had lots of time but still a low budget, I'd build a deployment pipeline using an off-the-shelf configuration management tool. And if I had plenty of money to throw around then I'd just invest in one of the commercial release management tools; they really do save a lot of time and it's easier for a paranoid IT infrastructure team to trust a well-known commercial tool than it is for them to trust something you hacked together in a few days.</p>
+"
+"326437","<p>If you're not using a build server then the simplest option is to put it in the config files. This way they're not embedded in source control. Think of database passwords, these are ""private keys"" too at the end of the day, and are commonly stored in config files. They aren't directly readable by a hacker either, unless they have access to your server -- in which case you'd have bigger problems than losing the private keys anyways</p>
+"
+"352513","<p>Why is it holding the secret? The app should never be holding the secret.</p>
+
+<p>Your back end (or the validation service you're using) for performing the authentication round trip should be holding the secret and nothing else should ever contain it. The client ID needs to be available for the user, it's what they use to know what they're authenticating for so that's necessary for them to be able to view.</p>
+
+<p>Yet again; <strong>the secret is secret</strong> and you should never give your users the chance to even catch a glimpse of it. If you do anyone can pose as you.</p>
+"
+"352557","<p>Popular services like Google use API key(s).  This key should be protected as this is what is used to track your usage against the service.  Many services are volume based and will charge appropriately based on usage.</p>
+
+<p>Typically, these services are accessed via a server side component.</p>
+
+<p>Client -> Your Service (API Key) -> Calls External Service</p>
+
+<p>Then the client knows nothing about the key.</p>
+"
+"352656","<blockquote>
+<p>Obviously we can't commit an env file to Github as it's sensitive information that we don't want the entire org to have access to.</p>
+</blockquote>
+<p>The fact that the information is sensitive doesn't mean it shouldn't be under version control. Similarly, the fact that you're using GitHub doesn't mean all your information is public. GitHub Enterprise has private repositories, and within your company, individual repositories can be restricted to a subset of employees.</p>
+<blockquote>
+<p>Right now we have a secure S3 file that contains the env file required for development.</p>
+</blockquote>
+<p>That's not the right approach. Instead of having your configuration in one  place—the version control, you're putting information in two different locations, one being rather difficult to access. While S3 supports versioning, it's not as straightforward as in Git. Finally, unless you somehow configured S3 to use your corporate SSO server, you're forced to create additional accounts for every user who needs to access the S3 file. This is an opened door to severe security issues (like in “Hey, I can't access the S3 file. Seems my account has an issue again!”; “Well, just use mine. The password is ...”)</p>
+<blockquote>
+<p>We've found that there are a lot of issues both keeping this up-to-date both in terms new env variables making it into this file, and pulling this down during development.</p>
+</blockquote>
+<p>Obviously. As explained below, two sources increase complexity.</p>
+<blockquote>
+<p>Are there any solutions for managing environment variables that people have found work particularly well?</p>
+</blockquote>
+<p>Private repositories.</p>
+<p>Another solution I've seen in several companies is to publish the settings into a public repository, but encrypt it. The problem with this approach is often the fact that the encryption key should be stored somewhere as well, and, more importantly, shared. This leads to two issues:</p>
+<ul>
+<li><p>When a disgruntled employee has your keys, you have to decrypt and reencrypt everything with a new key, and share the new key to every concerned person.</p>
+</li>
+<li><p>Everyone shares the same key. It might be OK for a small team (although I don't see a reason why this would be the preferred approach), but will quickly become an issue if the key needs to be shared with outsiders: consultants, interns, or people from other teams.</p>
+</li>
+</ul>
+<blockquote>
+<p>Additionally, there's no need for version control of this file. Commits or diffs on this file aren't going to be meaningful</p>
+</blockquote>
+<p>The first time you'll get your S3 file screwed by a disgruntled employee, you'll find that having a permanent history of every change is essential.</p>
+<p>Same for diffs. Spending hours figuring out that someone replaced by mistake the wrong key, and then trying to figure out how to get the right keys back is much less fun when you can just track all the changes step by step.</p>
+<blockquote>
+<p>The reason why private repositories are not the solution for this problem (we're already using private repos)</p>
+<ul>
+<li>These variables aren't limited to a single project. The development env file for instance is</li>
+</ul>
+</blockquote>
+<p>GitHub Enterprise has a branch restrictions feature. Although it is not as granular as directory-per-directory accesses, it may do the job.</p>
+<p>Otherwise, you may switch from GitHub to a service which makes it possible to restrict accesses per directory. Personally, I'm using a SVN repository which, among others, contains the configuration of every virtual machine I deploy: one part is publicly available, but the other part which contains confidential data such as the secret keys to Amazon AWS, Google and Twilio services, is restricted to named persons. It consists of a simple directory.</p>
+<blockquote>
+<ul>
+<li>Version-controlling this file would make development difficult or impossible. If we roll an API key, that's the API key that we need to use forever more. If you need to revert to an older revision and the key changes, that's a problem</li>
+</ul>
+</blockquote>
+<p>I don't think that there is an actual solution which works in every case. For instance, what if a revision you made two days ago migrated from Bing Maps to Google Maps? Meanwhile, you may have removed all the Bing Maps API keys; therefore, if someone reverts to an older version, it won't work, and there is nothing you can do.</p>
+<p>Otherwise, when it comes to the changes in API keys, this should be pretty rare. Unless you have a security breach, there is little use in changing those keys on regular basis.</p>
+<blockquote>
+<ul>
+<li>It's not strange for us to have to add a third-party to a repo. It's VERY important that they be able to view the code, but not the credentials.</li>
+</ul>
+</blockquote>
+<p>Same here. Branch restrictions in GitHub Enterprise, or per-directory permissions in version control systems which support this feature.</p>
+"
+"370058","<p>Your tl;dr version is &quot;of course not&quot;, but the underlying issue here is a fundamental and very common misunderstadning of what <em>secret</em> really means in these contexts.</p>
+<p>First things first, there is absolutely no way you can guarantee that a <em>secret</em> will remain ... well ... secret when distributed to client apps; that's regardless of whether they are web based or otherwise (mobile or IOT for example).</p>
+<p>In fact, using <em>AWS Cognito</em> as an example, they even explicitly mention the above in their <a href=""https://docs.aws.amazon.com/cognito/latest/developerguide/user-pool-settings-client-apps.html"" rel=""nofollow noreferrer"">docs on client apps and secrets</a>:</p>
+<blockquote>
+<p>If a secret is created for the app, the secret must be provided to use the app. <strong>Browser-based applications written in JavaScript may not need an app with a secret.</strong></p>
+</blockquote>
+<p>And for good reason – what good is a secret in a browser app where anyone can right-click their way to it in a few seconds?</p>
+<p>And even for clients distributed in a &quot;packaged&quot; fashion with no direct access to the source code like mobile apps, secrets <a href=""https://www.splinter.com.au/2014/09/16/storing-secret-keys/"" rel=""nofollow noreferrer"">can still be recovered</a>; all you can do is obfuscate them and hope no-one is going to decide they <em>really</em> need to find them. They are merely an inconvenience to whoever might be attempting to do something fishy.</p>
+<p>Actual <em>secret</em> comms can be enabled with flows involving a &quot;server in between&quot; but it comes down to the specifics of your situation. For example, <a href=""https://docs.aws.amazon.com/cognito/latest/developerguide/cognito-user-pools-app-idp-settings.html"" rel=""nofollow noreferrer"">borrowing from <em>Cognito</em> again</a>:</p>
+<blockquote>
+<p>For security reasons, we highly recommend that you use only the Authorization code grant flow, together with <strong>PKCE</strong>, for mobile apps.</p>
+</blockquote>
+<p>They key thing to remember is <strong>if it leaves the app / is part of a request it is not a secret</strong>, and even if it doesn't it is still possible that it gets compromised.</p>
+<p>Keep in mind that all the above hold true for <em>client secrets</em> / <em>API keys</em> when involving unauthenticated calls (e.g. sign up calls or API calls to get a products list on an e-commerce platform) <strong>only</strong>. Authenticated calls are a different thing and would require some sort of MITM attack or physical access to the attacked account to get ahold of.</p>
+<p>Summing up:</p>
+<ol>
+<li><p>Client secrets and API keys distributed to client apps are simply outside of your control to keep secret by definition and as such should at any given moment be considered <strong>as good as compromised</strong>.</p>
+</li>
+<li><p>Knowing the above, and assuming you want to &quot;keep people off your back&quot; you can include a <strong>rotation strategy</strong> for publicly distributed secrets to make it harder / inconvenient for people to get to them and (depending on how much effort you wish to spend on it) potentially identify them.</p>
+</li>
+<li><p>You should still use them for mobile apps in combination with <a href=""https://www.rfc-editor.org/rfc/rfc7636#section-1.1"" rel=""nofollow noreferrer"">PKCE</a>, just obfuscate them to the best of your ability first to minimize the potential of exposure (<strong>if and only if you're using them to calculate something like a HMAC locally or using some other way to protect them like SSL pinning</strong>) but keep in mind that even then people <a href=""https://medium.com/@felipecsl/bypassing-certificate-pinning-on-android-for-fun-and-profit-1b0d14beab2b"" rel=""nofollow noreferrer"">will still figure out ways to uncover them</a>.</p>
+</li>
+</ol>
+"
+"371006","<p>In your situation, I think the only viable option is your current favorite: use a separate web api. It is widely used throughout the industry for analytics, diagnostics, feedback and many more applications. For example, take a loot at how Google or Microsoft handle these types of input.</p>
+
+<p>However, you will need to really think about having a public-facing API - one that could be abused by tech-savvy users who extract the requests from your code or sniff them using other tools.</p>
+
+<p>As @JoeriShoeby mentioned in a comment, it's also very future-proof and powerful in controlling input from specific deployments.</p>
+"
+"373610","<p>Thinking about this holistically, there are several things to consider:</p>
+<ul>
+<li>Is the GitLab server hosted in the same network as the target environment?</li>
+<li>Do you have usernames and passwords in your config files?</li>
+<li>Can you separate security config from the normal application configuration?</li>
+</ul>
+<p>The first concern has to do with policy.  If the software will be deployed to a separate network, you may run afoul of policy issues even if your configurations are encrypted.</p>
+<h2>Avoiding Sensitive information</h2>
+<p>Be specific about what is sensitive.  For example, a server's domain name may not be sensitive, but it's IP address might be (or the association of the two).  Typically usernames and passwords are sensitive, as well as clientId and secret keys (OAuth2).</p>
+<p>Your best options are:</p>
+<ul>
+<li>Use connection strings that do not require username/password (see below)</li>
+<li>Separate sensitive information out of the main Web.config</li>
+<li>Use the <a href=""https://docs.microsoft.com/en-us/aspnet/identity/overview/features-api/best-practices-for-deploying-passwords-and-other-sensitive-data-to-aspnet-and-azure"" rel=""noreferrer"">file attribute in AppSettings</a> to read an external config file</li>
+</ul>
+<p>Some databases allow you to have a connection string where username and password are not part of the content.  For example, you can run your app under a domain service account to connect to SQL Server using integrated security.  Or you can use Oracle's Wallet to keep the username/password secret on the target machine.  Some OAuth2 services allow you to use a .csv or .json file stored on the machine in a standard location.</p>
+<p>In other words, do whatever you can to avoid keeping sensitive information where it doesn't belong.  If you have to make alterations to your app to look in a location on disk to read the sensitive bits you can set that up once on each target server and just read it from your app.</p>
+<h2>Configuration Servers</h2>
+<p><a href=""https://steeltoe.io/docs/steeltoe-configuration/#2-0-config-server-provider"" rel=""noreferrer"">Steeltoe</a> has been porting certain Spring integration libraries to C#, and they even have support for <a href=""https://github.com/spring-cloud/spring-cloud-config"" rel=""noreferrer"">Spring Cloud Config</a> servers.  The Spring Cloud Config server does require a Git repository <em>on the deployment network</em>, but does allow you to customize the config where it needs to be.  If your application is complex enough (i.e. micro-services) then this would be something worth looking into to keep server names protected under the same environment the servers are located.</p>
+<h2>Bottom line</h2>
+<p>You just want to avoid the need for the sensitive information as much as possible, but maintain the non-sensitive configurations in source control.  If you can't avoid the username/password in your config file (i.e. a different database that doesn't have an equivalent to integrated security) then load just that little bit from an external file.</p>
+"
+"382588","<p>You could say you are just moving the problem.  Ultimately, there will have to be a secret stored somewhere that your app has access to in order to have passwords, ssh keys, whatever.</p>
+
+<p>But, if done right, you are moving the problem from somewhere that is hard to secure properly to one you can guard better.  For example, putting secrets in a public github repo is pretty much like leaving your house keys taped to your front door.  Anybody who wants them won't have trouble finding them.  But if you move to, say a key store on an internal network with no outside connectivity you stand a much better chance of keeping your passwords secure.  That's more like keeping your keys in your pocket.  It's not impossible to lose them (the equivalent of giving out your Azure password for instance), but it limits your exposure vs. taping your keys to your door.</p>
+"
+"385060","<p>Disclaimer: I am not accredited or qualified to write about these things. Despite being able to recite these things from memory, I don't work on information security at all. It is possible that there are inaccuracies and/or misunderstandings in my writings.</p>
+
+<hr>
+
+<blockquote>
+  <p>the thought of securing an apikey is mind boggling</p>
+</blockquote>
+
+<p>Yes, it is. Information security is a mental wargame between you and some unknown assailants of unknown skill level.</p>
+
+<blockquote>
+  <p>but at some point if taken the time, anyone can get the key, even when apikey is in use or called, right?</p>
+</blockquote>
+
+<p>Yes, sort of. It is right to be paranoid about the possibilities. But not too much, since too much paranoia paralyze our thoughts and we won't be able to create anything useful.</p>
+
+<hr>
+
+<p>Specifically:</p>
+
+<ul>
+<li>An API key is a ""shared secret"" between you and the API provider (""Steam"").</li>
+<li>Being a ""shared secret"", anyone who got hold of it by whatever means, can perform any actions with the API, subject to the privileges (permissions) and limits associated with the API key (and your own account).</li>
+<li>When actions are performed with your API key (by whoever), the API provider knows that (in logging) that these actions are performed with that API key. It won't know which sentient being is doing that. It could be a cat or a dog.</li>
+<li>An API key is NOT an encryption key. You can't ""encrypt"" something just by having the API key in your hand.</li>
+</ul>
+
+<hr>
+
+<p>Ways API keys can be taken from a system</p>
+
+<ul>
+<li>Copied from a disk
+
+<ul>
+<li>Defense: protect the computer, protect the disk, protect the operating system, protect the file system</li>
+<li>Defense in depth: use the OS application security, by creating separate OS accounts for web-facing server applications and non-web-facing server applications, and by limiting access to secret-containing files to those non-web-facing server applications.</li>
+</ul></li>
+<li>Copied from the memory of a running application
+
+<ul>
+<li>Defense: eliminate exploitable vulnerabilities from your application
+
+<ul>
+<li>Example: choosing a programming language and runtime that has fewer exploitable vulnerabilities <em>as well as</em> being easier to reason about security.</li>
+<li>Example: avoid using any modules, libraries, dependencies, or services which are not rated for good security</li>
+<li>Example: fix as much bugs as you can, and patch third-party modules or libraries or dependencies as soon as patches for vulnerabilities are available.</li>
+</ul></li>
+<li>Delegate sensitive responsibility to better-built systems. This is the ""OS key store"" idea you have heard.
+
+<ul>
+<li>Note: this applies to cryptographic keys ONLY. It is NOT applicable to API keys. (Remember: API keys are merely ""shared secret""; they can't perform cryptographic operations.)</li>
+</ul></li>
+<li>Defense in depth: This is the ""Proxy"" idea that you have heard. 
+
+<ul>
+<li>Have two applications running. </li>
+<li>The first one, which is web-facing, is hardened, in the sense that it is programmed in a secure programming language and runtime environment, and it minimizes the attack surface by minimizing its own share of responsibility. </li>
+<li>For example, it could handle user authentication and input validation and sanitization, and nothing else. It passes on legitimate and harmless requests and responses to the second application. </li>
+<li>The second application contains the critical application logic, including the code that uses the API key. </li>
+<li>This second application is not web-facing, isolated from the network by a firewall that is integrated with your web server's application-level OS.</li>
+</ul></li>
+<li>Extra defense in depth: Have two (or more) applications, and put the second application (one which handles the sensitive part of work) on a different computer. Protect the second computer with network-layer firewall.</li>
+<li>How about Javascript (or untrusted client-side code)? They run on the customer's computer (or, a sophisticated assailant's computer), therefore anything it has access to is considered ""theirs"". Defense-in-depth is now a requirement: your Javascript code must talk to a C# web service hosted on your computer. That way, the client-side Javascript code doesn't need to know the API key.
+
+<ul>
+<li>Alternative: Once your customer has authenticated through, you may be able to ask the API service to create a short-lived ""session"" for your customer. The ""session"" is used exactly like your API key, but doesn't involve you leaking your API key to your customer. You promise not to abuse this ""session"", and the customer is the only other party who has a copy of this ""session"".</li>
+</ul></li>
+</ul></li>
+<li>Intercepted when the API key is transmitted on the network unprotected
+
+<ul>
+<li>Defense: encrypt the transmission (example: <a href=""https://en.wikipedia.org/wiki/Transport_Layer_Security"" rel=""nofollow noreferrer"">Transport Layer Security (TLS)</a>) so that only your application and a trusted endpoint (the ""Steam"" API server) can decrypt it</li>
+<li>Basic requirement: create, use, and maintain the validity of cryptographic certificates (yours, and the API provider's) that are used for mutual encryption and cryptographic authentication purposes.</li>
+</ul></li>
+<li>Copied from a computer that has a lot of control over the web-facing server
+
+<ul>
+<li>Example: your own (home) workstation, from which you do most of your programming work, including the development of your software which runs on a web-facing server</li>
+<li>Defense: protect all the computers you own (at home, at workplace) as well as all the computers you have control over (at the web hosting service)</li>
+</ul></li>
+</ul>
+
+<hr>
+
+<p>Ways API keys can be leaked with a human factor</p>
+
+<ul>
+<li>Accidentally copied-and-pasted the API key into some place which is not protected or is prone to leaking. For example, accidentally adding it to a source control system and then pushing it to a repository on the internet which is then visible to others
+
+<ul>
+<li>Defense: <code>.gitignore</code></li>
+<li>Best practices: never put the API key into the application source code. Putting it in a file that is git-ignored is the easiest way to satisfy this best practice (in combination with git-ignore). </li>
+<li>Note that, though, if there is reason to commit <code>app.config</code> (or a general application config file) into the source code repository, then the API key shouldn't go there.</li>
+</ul></li>
+<li>You memorized the API key, and then telling it to someone else
+
+<ul>
+<li>Defense: Don't do it unless you trust that person a lot</li>
+</ul></li>
+<li>Writing down the API key, and the piece of paper was seen, copied, or taken by someone else
+
+<ul>
+<li>Defense: Don't do it. Use a password manager. (This assumes your own computer is reasonably secured.)</li>
+</ul></li>
+<li>You typed in the API key, and someone else looked over your keystrokes, or your keystrokes gets logged on a keylogger
+
+<ul>
+<li>Defense: Avoid doing it too often. Use a password manager to reduce the number of times you have to recite and type it. </li>
+<li>Defense: Key rotation. Set expiration dates for API keys, and replace with new ones  before the old one expires. (This is the catch-all defense for many other inconceivable ways of key leak.)</li>
+</ul></li>
+</ul>
+
+<hr>
+
+<p>Ways API keys can be masqueraded without literally being taken</p>
+
+<ul>
+<li>Random guessing. 
+
+<ul>
+<li>Defense: make API keys long and random enough so that a ""random guesser"" has a very low probability of finding a usable one. This is the API provider's responsibility, not yours.</li>
+</ul></li>
+</ul>
+
+<hr>
+
+<p>Ways to limit damage when an API key is stolen</p>
+
+<ul>
+<li>Limit the privileges (permissions, access rights) that can be performed through the API key.</li>
+<li>Key rotation. Set expiration dates for API keys, and replace with new ones before the old one expires.</li>
+<li>Collect, protect, and scrutinize logs (records) to identify intrusions (both attempted and succeeded) as soon as possible, so that corrective actions can be taken sooner.</li>
+</ul>
+
+<hr>
+
+<p>and there's more ...</p>
+"
+"399002","<p>Anything that ends up on the client in an unencrypted form can be accessed by the client.  There's no way to avoid this.  You have not control over what the client is doing with the responses that come from your server.  The best you can do in this situation is obfuscate and/or try to make it more difficult for someone to access the key directly.</p>
+
+<p>In situations like this, where you want to be able to allow your client to make direct calls to a third-party under your authority, you need some sort of token, ticket, or signing system which allows you to grant specific access to the client in a way that the 3rd-party provider can verify without giving the client your credentials.</p>
+
+<p>I didn't spend much time looking into it and it's not really in the scope of this site to assist with the specifics of Googles API but as an example of how this works, it appears that this API provides a <a href=""https://developers.google.com/maps/documentation/maps-static/get-api-key"" rel=""nofollow noreferrer"">signature system</a>.  If I understand correctly, you would create a bare URL for the request that your client needs to make, and then using your credentials you get a signed URL from the API.  This happens on your server, you would never provide your key to the client.</p>
+
+<p>This signed URI would then be given back to the client and they can execute the call and the API will know that this is associated with your authority and billing.  Presumably there is some sort of time limit on this signed URL.  For those details, refer to the API documentation.</p>
+"
+"413047","<p>It is <em>exactly</em> the same as managing secrets in a small company. As soon as you have a company with more than one person in it, you need to manage secrets.</p>
+<p>So what can you do to prevent, for instance, the API keys to leak?</p>
+<ol>
+<li><p>You audit who access what. If recently a developer requested access to an API key, and a few days later, the API key was used outside the organization, it doesn't prove that the developer is the one who caused the API key to leak, but (1) management may still want to ask a few questions to this developer, and (2) the sole fact that the access is audited may be enough to prevent the secrets to leak in the first place.</p>
+</li>
+<li><p>You restrict access to the API to a range of IP addresses. So given an API key, the API can be used from your company, but not outside. Figuring out who's maliciously using the resources from one of your companies PC could be relatively easy.</p>
+</li>
+<li><p>You don't give access to everybody. If there is a team using an artificial intelligence API, and another team using geopositioning API, you don't give access to both APIs to every member of those two teams. One has access to the first API only; the other has access to the second API only.</p>
+<p>Similarly, there may be specific persons who can access production, and therefore read API keys used in production, and then there can be developers who can't do that. This way, those developers can have their personal API keys, or a shared API key with very limited impact. Say your production API key allows to use some beefy EC2 machines which cost you a few thousands of dollars per month; a shared development API key allows only smaller instances which cost about a few tens of dollars per month.</p>
+</li>
+<li><p>You file a complaint when the API key is stolen. If one of the employees is using it from home, the law enforcement would simply request the IP address to the API provider, and then find the person.</p>
+</li>
+<li><p>Or you make it useless to steal the API key in the first place. If you're pretty sure your employees would be inclined to play with the artificial intelligence API, or store some personal data on Amazon S3, just give them their personal API key that they can use in any way they want. Not only this would make your company look friendlier, but it could also encourage your employees to try something new on their free time, and then bring their inventions back to your company.</p>
+</li>
+</ol>
+"
+"421149","<p>What I've done in the past in this scenario is use a combination of <a href=""https://marketplace.visualstudio.com/items?itemName=vscps.SlowCheetah-XMLTransforms"" rel=""nofollow noreferrer"">SlowCheetah</a> and <a href=""https://marketplace.visualstudio.com/items?itemName=qetza.replacetokens"" rel=""nofollow noreferrer"">ReplaceTokens</a>.</p>
+<p>With SlowCheetah, you can create different app.config files for the different environments. It might not necessary to create different app.config files for the different environments, but I mostly do it because it makes it easier to separate executing the application locally and in production.</p>
+<p>With the ReplaceTokens task in an Azure Release pipeline, you can replace certain tokens in an app.config (or other configuration files) with variables that are defined in the Release pipeline itself.
+I understand your concern about protecting sensitive data like usernames and passwords; the Azure Release pipelines support 'hidden variables', so you can hide your sensitive data; just mark these variables as 'hidden' by clicking on the picture of the key lock at the right of the value box.</p>
+<p>For a really secure application you might use the Azure KeyVault, but that might be a too complex solution for this.</p>
+"
