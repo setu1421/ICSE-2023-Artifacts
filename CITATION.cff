@@ -1,0 +1,52 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  A StackExchange Dataset of Developer Questions  Related to
+  Checked-in Secrets in Software Artifacts
+message: >-
+  If you use this dataset, please cite it using the metadata
+  from this file.
+type: dataset
+authors:
+  - given-names: Setu Kumar
+    family-names: Basak
+    email: sbasak4@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Lorenzo
+    family-names: Neil
+    email: lcneil@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Bradley
+    family-names: Reaves
+    email: bgreaves@ncsu.edu
+    affiliation: North Carolina State University
+  - given-names: Laurie
+    family-names: Williams
+    email: lawilli3@ncsu.edu
+    affiliation: North Carolina State University
+identifiers:
+  - type: url
+    value: 'https://doi.org/10.5281/zenodo.7553204'
+    description: Zenodo
+repository-code: 'https://github.com/setu1421/ICSE-2023-Artifacts'
+repository-artifact: 'https://doi.org/10.5281/zenodo.7553204'
+abstract: >-
+  Throughout 2021, GitGuardian's monitoring of public GitHub
+  repositories revealed a two-fold increase in the number of
+  secrets (database credentials, API keys, and other
+  credentials) exposed compared to 2020, accumulating more
+  than six million secrets. To our knowledge, the challenges
+  developers face to avoid checked-in secrets are not yet
+  characterized. In our artifact, we provide a dataset
+  containing 779 questions mined from three StackExchange
+  sites asked by developers related to checked-in secrets
+  from three StackExchange sites. In addition, we provide
+  434 accepted answers provided by the other users of
+  StackExchange to mitigate the challenge of checked-in
+  secrets.
+keywords:
+  - software-secrets
+  - software-secret-management
+license: MIT
