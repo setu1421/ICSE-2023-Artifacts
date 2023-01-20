@@ -6,7 +6,7 @@
 [![DOI](https://zenodo.org/badge/589857531.svg)](https://doi.org/10.5281/zenodo.7553204)
 
 ## Getting Started:
-Our artifact contains 694 questions in Stack Overflow, 40 questions in Information Security, and 45 questions in Software Engineering sites. In total, our artifact contains 779 questions from the three sites of StackExchange spanning from September 2008 to December 2021. In addition, our artifact contains 390 answers in StackOverflow, 17 answers in Information Security, and 27 answers in Software Engineering sites. Each answer is an accepted answer provided by the StackExchange community to mitigate a specific challenge of checked-in secrets. Each field of our question artifacts is described below.
+Our artifact contains 694 questions from Stack Overflow, 40 questions from Information Security, and 45 questions from Software Engineering sites. In total, our artifact contains 779 questions from the three sites of StackExchange spanning from September 2008 to December 2021. In addition, our artifact contains 390 answers from StackOverflow, 17 answers from Information Security, and 27 answers from Software Engineering sites. Each answer is an accepted answer provided by the StackExchange community to mitigate a specific challenge of checked-in secrets. Each field of our question artifacts is described below.
 
 | Field Name       | Description                                                                         |
 |------------------|-------------------------------------------------------------------------------------|
