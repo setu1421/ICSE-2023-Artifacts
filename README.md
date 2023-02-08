@@ -3,7 +3,7 @@
 # A StackExchange Dataset of Developer Questions  Related to Checked-in Secrets in Software Artifacts
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) 
-[![DOI](https://zenodo.org/badge/589857531.svg)](https://doi.org/10.5281/zenodo.7553331)
+[![DOI](https://zenodo.org/badge/589857531.svg)](https://doi.org/10.5281/zenodo.7553203)
 
 ## Accepted Paper: [What are the Practices for Secret Management in Software Artifacts?](https://github.com/setu1421/ICSE-2023-Artifacts/blob/main/What%20are%20the%20Practices%20for%20Secret%20Management%20in%20Software%20Artifacts%3F.pdf)
 
