@@ -36,7 +36,15 @@ This project is licensed under the terms of the MIT license. Please check [LICEN
 The contents of all the Stack Exchange sites are under Creative Commons (CC BY-SA 3.0) license with the following requirements: "You are free to: Share - copy and redistribute the material in any medium or format, Adapt - remix, transform, and build upon the material for any purpose, even commercially".
 
 ## Citation:
-To cite, please check [CITATION.cff](https://github.com/setu1421/ICSE-2023-Artifacts/blob/main/CITATION.cff)
+To cite,
+
+```@article{basak2023challenges,
+  title={What Challenges Do Developers Face About Checked-in Secrets in Software Artifacts?},
+  author={Basak, Setu Kumar and Neil, Lorenzo and Reaves, Bradley and Williams, Laurie},
+  journal={arXiv preprint arXiv:2301.12377},
+  year={2023}
+}
+```
 
 ## Authors:
  - Setu Kumar Basak (sbasak4@ncsu.edu)
